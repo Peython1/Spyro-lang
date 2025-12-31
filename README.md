@@ -46,8 +46,8 @@ var p = Pessoa("Ana")
 escreva(p.fala())
 
 ## Documentação
-- Manual: docs/reference.md
-- Erros: docs/errors.md
-- Roadmap: docs/roadmap.md
-- Gramática: docs/spec-grammar.md
-- Semântica: docs/spec-semantics.md
+- Manual: reference.md
+- Erros: errors.md
+- Roadmap: roadmap.md
+- Gramática: spec-grammar.md
+- Semântica: spec-semantics.md
