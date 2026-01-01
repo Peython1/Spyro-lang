@@ -1,0 +1,78 @@
+# framewhack/core.spy
+# Core do framework - gerenciador de eventos e estado
+
+classe TibiaBot
+    funcao __init__(self, nome, servidor, porta)
+        self.nome = nome
+        self.servidor = servidor
+        self.porta = porta
+        self.conectado = falso
+        self.rodando = falso
+        self.vida = 100
+        self.mana = 100
+        self.posicao = {"x": 0, "y": 0, "z": 0}
+        self.inventario = []
+        self.handlers = {}
+        self.adaptador = nulo
+    fim
+
+    funcao configurar(self, config)
+        para chave, valor em config.items() faca
+            self[chave] = valor
+        fim
+        retorna self
+    fim
+
+    funcao registrar_handler(self, evento, callback)
+        se nao existe self.handlers[evento] entao
+            self.handlers[evento] = []
+        fim
+        self.handlers[evento].adiciona(callback)
+        retorna self
+    fim
+
+    funcao disparar_evento(self, evento, dados)
+        se existe self.handlers[evento] entao
+            para callback em self.handlers[evento] faca
+                callback(dados)
+            fim
+        fim
+    fim
+
+    funcao conectar(self, adaptador)
+        self.adaptador = adaptador
+        se self.adaptador.conectar(self.servidor, self.porta) entao
+            self.conectado = verdadeiro
+            self.disparar_evento("conectado", {"bot": self.nome})
+            retorna verdadeiro
+        senao
+            self.disparar_evento("erro", {"mensagem": "Falha ao conectar"})
+            retorna falso
+        fim
+    fim
+
+    funcao desconectar(self)
+        se self.adaptador entao
+            self.adaptador.desconectar()
+        fim
+        self.conectado = falso
+        self.rodando = falso
+        self.disparar_evento("desconectado", {"bot": self.nome})
+    fim
+
+    funcao iniciar_loop(self)
+        self.rodando = verdadeiro
+        enquanto self.rodando faca
+            se self.conectado entao
+                self.adaptador.processar_pacotes(self)
+            senao
+                pausa(1)
+            fim
+        fim
+    fim
+
+    funcao parar(self)
+        self.rodando = falso
+        self.desconectar()
+    fim
+fim
