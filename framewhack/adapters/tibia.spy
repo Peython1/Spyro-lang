@@ -1,0 +1,83 @@
+# framewhack/adapters/tibia.spy
+# Adaptador Tibia - conexão TCP e pacotes do protocolo
+
+classe TibiaAdapter
+    funcao __init__(self)
+        self.socket = nulo
+        self.buffer = ""
+        self.conectado = falso
+    fim
+
+    funcao conectar(self, servidor, porta)
+        tenta
+            escreva("[TibiaAdapter] Conectando em " + servidor + ":" + porta)
+            self.conectado = verdadeiro
+            retorna verdadeiro
+        captura e
+            escreva("[TibiaAdapter] Erro: " + e)
+            retorna falso
+        fim
+    fim
+
+    funcao enviar_packet(self, tipo, dados)
+        se nao self.conectado entao
+            retorna falso
+        fim
+        
+        var packet = {
+            "tipo": tipo,
+            "dados": dados,
+            "timestamp": agora()
+        }
+        
+        escreva("[TibiaAdapter] Enviando: " + tipo)
+        retorna verdadeiro
+    fim
+
+    funcao receber_packet(self)
+        retorna {
+            "tipo": "status",
+            "vida": 100,
+            "mana": 50
+        }
+    fim
+
+    funcao processar_pacotes(self, bot)
+        var packet = self.receber_packet()
+        
+        se packet["tipo"] == "status" entao
+            bot.vida = packet["vida"]
+            bot.mana = packet["mana"]
+            bot.disparar_evento("status_atualizado", packet)
+        
+        senao se packet["tipo"] == "criatura" entao
+            bot.disparar_evento("criatura_avistada", packet)
+        
+        senao se packet["tipo"] == "dano" entao
+            bot.disparar_evento("levou_dano", packet)
+        fim
+    fim
+
+    funcao atacar(self, alvo_id)
+        self.enviar_packet("atacar", {"alvo_id": alvo_id})
+    fim
+
+    funcao usar_magia(self, spell, alvo)
+        self.enviar_packet("magia", {"spell": spell, "alvo": alvo})
+    fim
+
+    funcao usar_item(self, item_id, slot)
+        self.enviar_packet("usar_item", {"item_id": item_id, "slot": slot})
+    fim
+
+    funcao mover(self, direcao)
+        self.enviar_packet("mover", {"direcao": direcao})
+    fim
+
+    funcao desconectar(self)
+        se self.socket entao
+            nulo
+        fim
+        self.conectado = falso
+    fim
+fim
