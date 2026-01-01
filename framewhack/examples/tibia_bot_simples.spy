@@ -1,0 +1,83 @@
+# framewhack/examples/tibia_bot_simples.spy
+# Exemplo: Bot Tibia simples com auto-ataque e auto-cura
+
+classe TibiaBot
+    funcao __init__(self, nome, servidor, porta)
+        self.nome = nome
+        self.servidor = servidor
+        self.porta = porta
+        self.conectado = falso
+        self.vida = 100
+        self.mana = 100
+        self.handlers = {}
+    fim
+
+    funcao registrar_handler(self, evento, callback)
+        se nao existe self.handlers[evento] entao
+            self.handlers[evento] = []
+        fim
+        self.handlers[evento].adiciona(callback)
+    fim
+
+    funcao disparar_evento(self, evento, dados)
+        se existe self.handlers[evento] entao
+            para callback em self.handlers[evento] faca
+                callback(dados)
+            fim
+        fim
+    fim
+fim
+
+classe TibiaAdapter
+    funcao __init__(self)
+        self.conectado = falso
+    fim
+
+    funcao conectar(self, servidor, porta)
+        escreva("[Bot] Conectando em " + servidor + ":" + porta + "...")
+        pausa(1)
+        self.conectado = verdadeiro
+        escreva("[Bot] Conectado com sucesso!")
+        retorna verdadeiro
+    fim
+
+    funcao atacar(self, alvo_id)
+        escreva("[Bot] Atacando criatura ID: " + alvo_id)
+    fim
+
+    funcao usar_magia(self, spell, alvo)
+        escreva("[Bot] Usando " + spell + " em " + alvo)
+    fim
+fim
+
+var meu_bot = TibiaBot("MeuBotTibia", "localhost", 7171)
+var adapter = TibiaAdapter()
+
+meu_bot.registrar_handler("conectado", funcao(evento)
+    escreva("[Log] Bot conectado: " + evento["nome"])
+fim)
+
+meu_bot.registrar_handler("criatura_avistada", funcao(evento)
+    escreva("[Log] Criatura encontrada: " + evento["nome"])
+    adapter.atacar(evento["id"])
+fim)
+
+meu_bot.registrar_handler("levou_dano", funcao(evento)
+    escreva("[Log] Bot levou " + evento["dano"] + " de dano!")
+    se meu_bot.vida < 30 entao
+        escreva("[Log] Usando Exura...")
+        adapter.usar_magia("exura", "MeuBotTibia")
+    fim
+fim)
+
+adapter.conectar(meu_bot.servidor, meu_bot.porta)
+meu_bot.conectado = verdadeiro
+meu_bot.disparar_evento("conectado", {"nome": "MeuBotTibia"})
+
+pausa(2)
+meu_bot.disparar_evento("criatura_avistada", {"id": 1, "nome": "Orc"})
+pausa(1)
+meu_bot.vida = 20
+meu_bot.disparar_evento("levou_dano", {"dano": 80})
+
+escreva("[Bot] Exemplo finalizado!")
