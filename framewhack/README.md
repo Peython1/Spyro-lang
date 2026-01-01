@@ -1,4 +1,4 @@
-Enter# Framewhack - Framework Bot para Tibia & Pokétibia
+## Framewhack - Framework Bot para Tibia & Pokétibia
 
 Framework em **Spyro** para criar bots de **Tibia** e **Pokétibia** com suporte a automação, handlers de eventos e adaptadores multi-servidor.
 
