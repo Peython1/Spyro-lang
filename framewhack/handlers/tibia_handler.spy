@@ -1,0 +1,47 @@
+# framewhack/handlers/tibia_handler.spy
+# Handler de lógica Tibia - automação de ações
+
+classe TibiaLogicaHandler
+    funcao __init__(self, bot)
+        self.bot = bot
+        self.vida_minima = 30
+        self.mana_minima = 20
+    fim
+
+    funcao ao_tomar_dano(self, evento)
+        escreva("[Handler] Bot tomou dano! Vida: " + self.bot.vida)
+        
+        se self.bot.vida < self.vida_minima entao
+            self.curar()
+        fim
+    fim
+
+    funcao curar(self)
+        escreva("[Handler] Curando com feitiço...")
+        self.bot.adaptador.usar_magia("exura", self.bot.nome)
+    fim
+
+    funcao ao_criatura_avistada(self, evento)
+        escreva("[Handler] Criatura avistada: " + evento["nome"])
+        escreva("[Handler] Iniciando combate automático...")
+        self.bot.adaptador.atacar(evento["id"])
+    fim
+
+    funcao ao_status_atualizado(self, evento)
+        escreva("[Handler] Status - Vida: " + evento["vida"] + " | Mana: " + evento["mana"])
+    fim
+
+    funcao registrar_handlers(self)
+        self.bot.registrar_handler("levou_dano", funcao(evento) 
+            self.ao_tomar_dano(evento)
+        fim)
+        
+        self.bot.registrar_handler("criatura_avistada", funcao(evento)
+            self.ao_criatura_avistada(evento)
+        fim)
+        
+        self.bot.registrar_handler("status_atualizado", funcao(evento)
+            self.ao_status_atualizado(evento)
+        fim)
+    fim
+fim
